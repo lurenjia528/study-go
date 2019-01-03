@@ -55,6 +55,7 @@ func main() {
 				if k == 0 {
 					if !strings.EqualFold(oldImageName, newImageName) {
 						tagImage(oldImageName, newImageName)
+						deleteImage(oldImageName)
 					}
 					pushImage(newImageName)
 				}
@@ -72,6 +73,7 @@ func main() {
 				newImageName := getNewImageName(imageName)
 				if !strings.EqualFold(oldImageName, newImageName) {
 					tagImage(oldImageName, newImageName)
+					deleteImage(oldImageName)
 				}
 				pushImage(newImageName)
 			} else {
@@ -80,6 +82,7 @@ func main() {
 				newImageName := getNewImageName(oldImageName)
 				if !strings.EqualFold(oldImageName, newImageName) {
 					tagImage(oldImageName, newImageName)
+					deleteImage(oldImageName)
 				}
 				pushImage(newImageName)
 			}
