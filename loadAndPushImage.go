@@ -53,7 +53,10 @@ func main() {
 					newImageName = getNewImageName(oldImageName)
 				}
 				if k == 0 {
-					changeNameAndRmAndPushImage(oldImageName, newImageName)
+					if !strings.EqualFold(oldImageName, newImageName) {
+						tagImage(oldImageName, newImageName)
+					}
+					pushImage(newImageName)
 				}
 				if k > 0 {
 					deleteImage(oldImageName)
@@ -67,16 +70,23 @@ func main() {
 				imageName := split[len(split)-1]
 				//newImageName := os.Args[1] + "/" + os.Args[2] + "/" + imageName
 				newImageName := getNewImageName(imageName)
-				changeNameAndRmAndPushImage(oldImageName, newImageName)
+				if !strings.EqualFold(oldImageName, newImageName) {
+					tagImage(oldImageName, newImageName)
+				}
+				pushImage(newImageName)
 			} else {
 				oldImageName := strings.Replace(result, "Loaded image:", "", -1)
 				//newImageName := os.Args[1] + "/" + os.Args[2] + "/" + oldImageName
 				newImageName := getNewImageName(oldImageName)
-				changeNameAndRmAndPushImage(oldImageName, newImageName)
+				if !strings.EqualFold(oldImageName, newImageName) {
+					tagImage(oldImageName, newImageName)
+				}
+				pushImage(newImageName)
 			}
 		}
 	}
 }
+
 func getNewImageName(imageName string) string {
 	var newImageName string
 	if os.Args[2] == "nil" {
@@ -86,12 +96,16 @@ func getNewImageName(imageName string) string {
 	}
 	return newImageName
 }
-func changeNameAndRmAndPushImage(oldImageName string, newImageName string) {
+
+func tagImage(oldImageName string, newImageName string) {
 	tagShell := strings.Join([]string{"docker tag ", oldImageName, newImageName}, " ")
 	fmt.Print("正在执行...")
 	fmt.Println(tagShell)
 	execCommand(tagShell)
-	pushShell := strings.Join([]string{"docker rmi ", oldImageName, " && docker push ", newImageName}, " ")
+}
+
+func pushImage(newImageName string) {
+	pushShell := strings.Join([]string{" && docker push ", newImageName}, " ")
 	fmt.Print("正在执行...")
 	fmt.Println(pushShell)
 	execCommand(pushShell)
