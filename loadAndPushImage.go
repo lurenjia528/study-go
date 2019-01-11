@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	if len(os.Args) == 1 || len(os.Args) == 3 {
+	if len(os.Args) == 1 || len(os.Args) == 5 {
 		fmt.Println("缺少参数，请参考 --help")
 		os.Exit(0)
 	}
@@ -21,7 +21,9 @@ func main() {
 		fmt.Println("usage:./xxxx args1 args2 true \n " +
 			"args1: \t required 仓库地址 \n " +
 			"args2: \t required 项目地址 没有请填写nil \n " +
-			"true | false: \t required  是否递归当前文件夹下的子文件夹 \n ")
+			"true | false: \t required  是否递归当前文件夹下的子文件夹 \n " +
+			"push: \t required  是否push \n " +
+			"save: \t required  是否save \n")
 		os.Exit(0)
 	}
 
@@ -57,7 +59,12 @@ func main() {
 						tagImage(oldImageName, newImageName)
 						deleteImage(oldImageName)
 					}
-					pushImage(newImageName)
+					if os.Args[4] == "push" {
+						pushImage(newImageName)
+					}
+					if os.Args[5] == "save" {
+						saveImage(newImageName)
+					}
 				}
 				if k > 0 {
 					deleteImage(oldImageName)
@@ -75,7 +82,12 @@ func main() {
 					tagImage(oldImageName, newImageName)
 					deleteImage(oldImageName)
 				}
-				pushImage(newImageName)
+				if os.Args[4] == "push" {
+					pushImage(newImageName)
+				}
+				if os.Args[5] == "save" {
+					saveImage(newImageName)
+				}
 			} else {
 				oldImageName := strings.Replace(result, "Loaded image:", "", -1)
 				//newImageName := os.Args[1] + "/" + os.Args[2] + "/" + oldImageName
@@ -84,7 +96,12 @@ func main() {
 					tagImage(oldImageName, newImageName)
 					deleteImage(oldImageName)
 				}
-				pushImage(newImageName)
+				if os.Args[4] == "push" {
+					pushImage(newImageName)
+				}
+				if os.Args[5] == "save" {
+					saveImage(newImageName)
+				}
 			}
 		}
 	}
@@ -118,7 +135,7 @@ func saveImage(newImageName string) {
 	replace := strings.Replace(newImageName, "/", "_", -1)
 	s := strings.Replace(replace, ":", "_", -1)
 	tarName := s + ".tar"
-	saveShell := strings.Join([]string{"docker save ", newImageName, "> ",tarName }, " ")
+	saveShell := strings.Join([]string{"docker save ", newImageName, "> ", tarName}, " ")
 	fmt.Print("正在执行...")
 	fmt.Println(saveShell)
 	execCommand(saveShell)
