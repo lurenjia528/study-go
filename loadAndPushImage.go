@@ -114,6 +114,16 @@ func pushImage(newImageName string) {
 	execCommand(pushShell)
 }
 
+func saveImage(newImageName string) {
+	replace := strings.Replace(newImageName, "/", "_", -1)
+	s := strings.Replace(replace, ":", "_", -1)
+	tarName := s + ".tar"
+	saveShell := strings.Join([]string{"docker save ", newImageName, "> ",tarName }, " ")
+	fmt.Print("正在执行...")
+	fmt.Println(saveShell)
+	execCommand(saveShell)
+}
+
 func deleteImage(imageName string) {
 	rmShell := strings.Join([]string{"docker rmi ", imageName}, " ")
 	fmt.Print("正在执行...")
