@@ -1,0 +1,65 @@
+{
+  "id": "/microservice/redis",
+  "cmd": "/redis/src/redis-server /redis/redis.conf && while true; do sleep 1000;done ",
+  "cpus": 0.5,
+  "mem": 512,
+  "disk": 0,
+  "instances": 1,
+  "constraints": [
+    [
+      "rack",
+      "CLUSTER",
+      "ft1500a"
+    ]
+  ],
+  "container": {
+    "type": "DOCKER",
+    "volumes": [
+      {
+        "containerPath": "/redis/redis.conf",
+        "hostPath": "/nas/microservice/redis-4.0.10/redis.conf",
+        "mode": "RW"
+      },
+      {
+        "containerPath": "/var",
+        "hostPath": "/nas/microservice/redis-4.0.10/var",
+        "mode": "RW"
+      }
+    ],
+    "docker": {
+      "image": "ygt/redis:4.0.10",
+      "network": "BRIDGE",
+      "portMappings": [
+        {
+          "containerPort": 6379,
+          "hostPort": 0,
+          "servicePort": 10007,
+          "protocol": "tcp",
+          "labels": {}
+        }
+      ],
+      "privileged": false,
+      "parameters": [
+        {
+          "key": "cpu-quota",
+          "value": "50000"
+        }
+      ],
+      "forcePullImage": false
+    }
+  },
+  "healthChecks": [
+    {
+      "protocol": "TCP",
+      "portIndex": 0,
+      "gracePeriodSeconds": 60,
+      "intervalSeconds": 10,
+      "timeoutSeconds": 10,
+      "maxConsecutiveFailures": 2,
+      "ignoreHttp1xx": false
+    }
+  ],
+  "labels": {
+    "HAPROXY_GROUP": "external"
+  }
+}
