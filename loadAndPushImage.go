@@ -22,8 +22,8 @@ func main() {
 			"args1: \t required 仓库地址 \n " +
 			"args2: \t required 项目地址 没有请填写nil \n " +
 			"true | false: \t required  是否递归当前文件夹下的子文件夹 \n " +
-			"push: \t required  是否push \n " +
-			"save: \t required  是否save \n")
+			"push: \t required  是否push,需要写push,不需要写nopush \n " +
+			"save: \t required  是否save,需要写save,不需要写nosave \n")
 		os.Exit(0)
 	}
 
@@ -57,7 +57,7 @@ func main() {
 				if k == 0 {
 					if !strings.EqualFold(oldImageName, newImageName) {
 						tagImage(oldImageName, newImageName)
-						deleteImage(oldImageName)
+						deleteImage(oldImageName, newImageName)
 					}
 					if os.Args[4] == "push" {
 						pushImage(newImageName)
@@ -67,7 +67,7 @@ func main() {
 					}
 				}
 				if k > 0 {
-					deleteImage(oldImageName)
+					deleteImage(oldImageName, newImageName)
 				}
 			}
 		} else {
@@ -80,7 +80,7 @@ func main() {
 				newImageName := getNewImageName(imageName)
 				if !strings.EqualFold(oldImageName, newImageName) {
 					tagImage(oldImageName, newImageName)
-					deleteImage(oldImageName)
+					deleteImage(oldImageName, newImageName)
 				}
 				if os.Args[4] == "push" {
 					pushImage(newImageName)
@@ -94,7 +94,7 @@ func main() {
 				newImageName := getNewImageName(oldImageName)
 				if !strings.EqualFold(oldImageName, newImageName) {
 					tagImage(oldImageName, newImageName)
-					deleteImage(oldImageName)
+					deleteImage(oldImageName, newImageName)
 				}
 				if os.Args[4] == "push" {
 					pushImage(newImageName)
@@ -118,6 +118,9 @@ func getNewImageName(imageName string) string {
 }
 
 func tagImage(oldImageName string, newImageName string) {
+	if strings.EqualFold(oldImageName, newImageName) {
+		return
+	}
 	tagShell := strings.Join([]string{"docker tag ", oldImageName, newImageName}, " ")
 	fmt.Print("正在执行...")
 	fmt.Println(tagShell)
@@ -141,7 +144,10 @@ func saveImage(newImageName string) {
 	execCommand(saveShell)
 }
 
-func deleteImage(imageName string) {
+func deleteImage(imageName, newImageName string) {
+	if strings.EqualFold(imageName, newImageName) {
+		return
+	}
 	rmShell := strings.Join([]string{"docker rmi ", imageName}, " ")
 	fmt.Print("正在执行...")
 	fmt.Println(rmShell)
