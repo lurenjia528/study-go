@@ -54,10 +54,12 @@ func main() {
 				} else {
 					newImageName = getNewImageName(oldImageName)
 				}
+				oldImageName = strings.TrimSpace(oldImageName)
+				newImageName = strings.TrimSpace(newImageName)
 				if k == 0 {
-					if !strings.EqualFold(oldImageName, newImageName) {
+					if !(oldImageName == newImageName) {
 						tagImage(oldImageName, newImageName)
-						deleteImage(oldImageName, newImageName)
+						deleteImage(oldImageName,newImageName)
 					}
 					if os.Args[4] == "push" {
 						pushImage(newImageName)
@@ -67,7 +69,7 @@ func main() {
 					}
 				}
 				if k > 0 {
-					deleteImage(oldImageName, newImageName)
+					deleteImage(oldImageName,newImageName)
 				}
 			}
 		} else {
@@ -78,9 +80,11 @@ func main() {
 				imageName := split[len(split)-1]
 				//newImageName := os.Args[1] + "/" + os.Args[2] + "/" + imageName
 				newImageName := getNewImageName(imageName)
-				if !strings.EqualFold(oldImageName, newImageName) {
+				oldImageName = strings.TrimSpace(oldImageName)
+				newImageName = strings.TrimSpace(newImageName)
+				if !(oldImageName == newImageName) {
 					tagImage(oldImageName, newImageName)
-					deleteImage(oldImageName, newImageName)
+					deleteImage(oldImageName,newImageName)
 				}
 				if os.Args[4] == "push" {
 					pushImage(newImageName)
@@ -92,9 +96,11 @@ func main() {
 				oldImageName := strings.Replace(result, "Loaded image:", "", -1)
 				//newImageName := os.Args[1] + "/" + os.Args[2] + "/" + oldImageName
 				newImageName := getNewImageName(oldImageName)
-				if !strings.EqualFold(oldImageName, newImageName) {
+				oldImageName = strings.TrimSpace(oldImageName)
+				newImageName = strings.TrimSpace(newImageName)
+				if !(oldImageName == newImageName) {
 					tagImage(oldImageName, newImageName)
-					deleteImage(oldImageName, newImageName)
+					deleteImage(oldImageName,newImageName)
 				}
 				if os.Args[4] == "push" {
 					pushImage(newImageName)
@@ -114,13 +120,10 @@ func getNewImageName(imageName string) string {
 	} else {
 		newImageName = os.Args[1] + "/" + os.Args[2] + "/" + imageName
 	}
-	return newImageName
+	return strings.TrimSpace(newImageName)
 }
 
 func tagImage(oldImageName string, newImageName string) {
-	if strings.EqualFold(oldImageName, newImageName) {
-		return
-	}
 	tagShell := strings.Join([]string{"docker tag ", oldImageName, newImageName}, " ")
 	fmt.Print("正在执行...")
 	fmt.Println(tagShell)
@@ -128,7 +131,7 @@ func tagImage(oldImageName string, newImageName string) {
 }
 
 func pushImage(newImageName string) {
-	pushShell := strings.Join([]string{" && docker push ", newImageName}, " ")
+	pushShell := strings.Join([]string{"docker push ", newImageName}, " ")
 	fmt.Print("正在执行...")
 	fmt.Println(pushShell)
 	execCommand(pushShell)
@@ -144,8 +147,8 @@ func saveImage(newImageName string) {
 	execCommand(saveShell)
 }
 
-func deleteImage(imageName, newImageName string) {
-	if strings.EqualFold(imageName, newImageName) {
+func deleteImage(imageName,newImageName string) {
+	if imageName == newImageName {
 		return
 	}
 	rmShell := strings.Join([]string{"docker rmi ", imageName}, " ")
