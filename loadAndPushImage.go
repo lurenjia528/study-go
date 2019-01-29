@@ -38,7 +38,7 @@ func init() {
 func usage() {
 	fmt.Print(`遍历当前文件夹及其子文件夹,上传,推送,保存镜像
   --registry string
-        required | 镜像仓库名 (default "kylincloud2.hub")
+        required | 镜像仓库名 (default "ygt")
   --project string
         required | 镜像仓库项目名
   --recursive
