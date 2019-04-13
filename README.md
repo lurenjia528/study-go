@@ -17,3 +17,9 @@ rsrc -manifest test.manifest –ico check.ico -o rsrc.syso
 go build -ldflags="-s -w -H windowsgui"
 ```
 生成exe文件
+
+# statik
+
+把静态资源打包进可执行文件
+
+参考https://github.com/rakyll/statik/tree/master/example
