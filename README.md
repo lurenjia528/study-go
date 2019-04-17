@@ -23,3 +23,7 @@ go build -ldflags="-s -w -H windowsgui"
 把静态资源打包进可执行文件
 
 参考https://github.com/rakyll/statik/tree/master/example
+
+# rpc 测试
+
+添加rpc测试
