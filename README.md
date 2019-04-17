@@ -27,3 +27,25 @@ go build -ldflags="-s -w -H windowsgui"
 # rpc 测试
 
 添加rpc测试
+```bash
+protoc --stdrpc_out=. arith.proto
+```
+# grpc 测试
+
+添加grpc
+
+安装grpc
+```bash
+git clone https://github.com/grpc/grpc-go.git $GOPATH/src/google.golang.org/grpc
+git clone https://github.com/golang/net.git $GOPATH/src/golang.org/x/net
+git clone https://github.com/golang/text.git $GOPATH/src/golang.org/x/text
+go get -u github.com/golang/protobuf/{proto,protoc-gen-go}
+git clone https://github.com/google/go-genproto.git $GOPATH/src/google.golang.org/genproto
+git clone https://github.com/golang/sys $GOPATH/src/golang.org/x/sys
+git clone https://github.com/golang/net $GOPATH/src/golang.org/x/net
+go install google.golang.org/grpc
+```
+```bash
+ protoc --go_out=plugins=grpc:. helloworld.proto
+// 我手动把生成的XXX_删除了
+```

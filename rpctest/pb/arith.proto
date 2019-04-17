@@ -20,4 +20,3 @@ service ArithService{
     rpc multiply (ArithRequest) returns (ArithResponse);
     rpc divide (ArithRequest) returns (ArithResponse);
 }
-// protoc --stdrpc_out=. arith.proto
