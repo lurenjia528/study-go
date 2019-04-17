@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"github.com/andlabs/ui"
 )
+var qwe string
+var wwe string
 
 func main() {
 	err := ui.Main(func() {
