@@ -49,3 +49,7 @@ go install google.golang.org/grpc
  protoc --go_out=plugins=grpc:. helloworld.proto
 // 我手动把生成的XXX_删除了
 ```
+
+# 添加go聊天室
+
+# 添加websocket聊天室
