@@ -53,3 +53,9 @@ go install google.golang.org/grpc
 # 添加go聊天室
 
 # 添加websocket聊天室
+
+# cobra命令行工具
+
+# redis
+
+# mongodb
