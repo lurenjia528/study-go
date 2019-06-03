@@ -5,6 +5,7 @@ import (
 	"github.com/lurenjia528/study-go/grpctest/pb"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"net"
 
 )
@@ -16,6 +17,14 @@ type myServer struct {
 }
 
 func (m *myServer) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.HelloReply, error) {
+	md, ok := metadata.FromIncomingContext(ctx)
+	if !ok {
+		fmt.Println("error")
+	}
+	for _,str := range md.Get("k3") {
+		fmt.Println(str)
+	}
+
 	return &pb.HelloReply{"请求server端成功!"}, nil
 }
 
