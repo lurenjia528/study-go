@@ -2,14 +2,22 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"github.com/lurenjia528/study-go/grpctest/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"net/http"
 )
 
 // 此处应与服务器端对应
 const address = "127.0.0.1:50051"
+
+var addr string
+
+func init() {
+	flag.StringVar(&addr, "addr", "grpc_server address", "grpc服务端地址")
+}
 
 /**
     1. 创建groc连接器
@@ -18,9 +26,20 @@ const address = "127.0.0.1:50051"
     4. 获取grpc服务端返回的结果
  */
 func main() {
+	flag.Parse()
+	http.HandleFunc("/hw", hand)
+	http.ListenAndServe(":8080", nil)
+}
 
+func hand(resp http.ResponseWriter, req *http.Request) {
+	auth := req.Header.Get("Authorization")
+	fmt.Println(auth)
+	grpcclient(auth)
+}
+
+func grpcclient(auth string) {
 	// 创建一个grpc连接器
-	conn, err := grpc.Dial(address, grpc.WithInsecure())
+	conn, err := grpc.Dial(addr+":50051", grpc.WithInsecure())
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -33,7 +52,7 @@ func main() {
 	ctx := context.Background()
 
 	md := metadata.MD{}
-	ctx = metadata.AppendToOutgoingContext(ctx, "k3", "v4")
+	ctx = metadata.AppendToOutgoingContext(ctx, "Authorization", auth)
 	grpc.SetHeader(ctx, md)
 
 	name := "我是客户端,正在请求服务端!!!"

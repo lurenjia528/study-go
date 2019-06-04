@@ -21,7 +21,7 @@ func (m *myServer) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.Hello
 	if !ok {
 		fmt.Println("error")
 	}
-	for _,str := range md.Get("k3") {
+	for _,str := range md.Get("Authorization") {
 		fmt.Println(str)
 	}
 
