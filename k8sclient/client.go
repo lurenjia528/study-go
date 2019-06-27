@@ -24,8 +24,8 @@ func main() {
 	getOneDeployment(clientSet)
 }
 
-func getOneDeployment(clientset *kubernetes.Clientset) {
-	deployment, err := clientset.AppsV1().Deployments("kube-system").Get("cloudapiservera", metav1.GetOptions{})
+func getOneDeployment(clientSet *kubernetes.Clientset) {
+	deployment, err := clientSet.AppsV1().Deployments("kube-system").Get("cloudapiservera", metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		fmt.Println("deployment not found")
 	}
@@ -72,7 +72,7 @@ func getAllPods(clientSet *kubernetes.Clientset) {
 	}
 }
 
-func getClientSet() (*kubernetes.Clientset) {
+func getClientSet() *kubernetes.Clientset {
 	var kubeconfig *string
 	if home := homeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
