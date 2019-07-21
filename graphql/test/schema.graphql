@@ -1,0 +1,23 @@
+type User {
+    UserID : String!
+    Name   : String!
+    Pwd    : String!
+    Email  : String
+    Phone  : String!
+    Status : Int!
+    ID      : Int!
+    CreatedTime :DateTime
+    DeletedTime : String
+    UpdatedTime : String
+}
+
+type Query {
+    UserInfo(userID:Int!) : User
+    UserListInfo:[User]
+}
+
+type Mutation {
+    createUser(userName:String!,email:String!,pwd:String!,phone:String!):User
+    changeUserName (userId:Int!,name:String!): User
+    deleteUser(userId:Int!): Boolean
+}

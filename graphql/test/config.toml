@@ -1,0 +1,2 @@
+Addr = "0.0.0.0:8080"
+MysqlAddr = "root:123123123@tcp(127.0.0.1:3306)/graphql?charset=utf8&parseTime=true"

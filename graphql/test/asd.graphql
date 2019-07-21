@@ -1,0 +1,10 @@
+query GetUserList {
+    UserListInfo {
+        userID
+        name
+        email
+        phone
+        pwd
+        status
+    }
+}
