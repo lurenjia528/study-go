@@ -1,7 +1,7 @@
 # crud
 
 全是get请求
-`
+``` 
 # create
 # mutation mutation_create_name2 {
 #   create(name: "Inca Kola", info: "Inca Kola is a soft drink that was created in Peru in 1935 by British immigrant Joseph Robinson Lindley using lemon verbena (wiki)", price: 1.99) {
@@ -61,6 +61,6 @@
 #     price
 #   }
 # }
-
+```
 
 `
