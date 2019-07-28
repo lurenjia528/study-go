@@ -18,6 +18,8 @@ var (
 	cli *client.Client
 )
 
+// docker exec -it 效果
+// 需要修改front/src/components/Index.vue +24 ws地址
 func main() {
 	initDockerAPI()
 

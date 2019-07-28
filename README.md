@@ -66,4 +66,4 @@ go install google.golang.org/grpc
 
 # graphql
 
-# docker-web-terminal
+# docker-web-terminal-log
