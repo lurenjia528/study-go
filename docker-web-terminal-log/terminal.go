@@ -56,7 +56,7 @@ func terminal(w http.ResponseWriter, r *http.Request) {
 	// websocket握手
 	conn, err := upGrader.Upgrade(w, r, nil)
 	if err != nil {
-		log.Printf("websocket握手失败：err: %s",err.Error())
+		log.Printf("websocket握手失败：err: %s", err.Error())
 		return
 	}
 	defer conn.Close()
@@ -65,10 +65,10 @@ func terminal(w http.ResponseWriter, r *http.Request) {
 	// 获取容器ID或name
 	container := r.Form.Get("container")
 	// 执行exec，获取到容器终端的连接
-	hr, err := exec(container,"/bin/bash")
+	hr, err := exec(container, "/bin/bash")
 	if err != nil {
-		log.Printf("container:%s /bin/bash不存在,换为/bin/sh",container)
-		hr,err = exec(container,"/bin/sh")
+		log.Printf("container:%s /bin/bash不存在,换为/bin/sh", container)
+		hr, err = exec(container, "/bin/sh")
 	}
 	// 关闭I/O流
 	defer hr.Close()
@@ -83,7 +83,7 @@ func terminal(w http.ResponseWriter, r *http.Request) {
 	wsReaderCopy(conn, hr.Conn)
 }
 
-func exec(container string,shell string) (hr types.HijackedResponse, err error) {
+func exec(container string, shell string) (hr types.HijackedResponse, err error) {
 	// 执行/bin/sh命令
 	ir, err := cli.ContainerExecCreate(ctx, container, types.ExecConfig{
 		AttachStdin:  true,
@@ -101,7 +101,7 @@ func exec(container string,shell string) (hr types.HijackedResponse, err error) 
 
 	err = cli.ContainerExecResize(ctx, ir.ID, types.ResizeOptions{Width: 1280, Height: 1280})
 	if err != nil {
-		return hr,err
+		return hr, err
 	}
 	return
 }
