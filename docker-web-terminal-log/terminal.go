@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/gorilla/websocket"
@@ -57,7 +56,7 @@ func terminal(w http.ResponseWriter, r *http.Request) {
 	// websocket握手
 	conn, err := upGrader.Upgrade(w, r, nil)
 	if err != nil {
-		fmt.Println(err.Error())
+		log.Printf("websocket握手失败：err: %s",err.Error())
 		return
 	}
 	defer conn.Close()
@@ -68,7 +67,7 @@ func terminal(w http.ResponseWriter, r *http.Request) {
 	// 执行exec，获取到容器终端的连接
 	hr, err := exec(container,"/bin/bash")
 	if err != nil {
-		fmt.Println("/bin/bash不存在,换为/bin/sh")
+		log.Printf("container:%s /bin/bash不存在,换为/bin/sh",container)
 		hr,err = exec(container,"/bin/sh")
 	}
 	// 关闭I/O流
