@@ -36,8 +36,9 @@ func main() {
 
 func initDockerAPI() {
 	ctx = context.Background()
-	_ = os.Setenv("DOCKER_HOST", "tcp://127.0.0.1:4243")
-	newCli, err := client.NewClientWithOpts(client.FromEnv)
+	//_ = os.Setenv("DOCKER_HOST", "tcp://127.0.0.1:4243")
+	_ = os.Setenv("DOCKER_HOST", "tcp://192.168.40.1:4243")
+	newCli, err := client.NewEnvClient()
 	cli = newCli
 	if err != nil {
 		panic(err)
@@ -65,16 +66,16 @@ func terminal(w http.ResponseWriter, r *http.Request) {
 	// 获取容器ID或name
 	container := r.Form.Get("container")
 	// 执行exec，获取到容器终端的连接
-	hr, err := exec(container)
+	hr, err := exec(container,"/bin/bash")
 	if err != nil {
-		fmt.Println(err.Error())
-		return
+		fmt.Println("/bin/bash不存在,换为/bin/sh")
+		hr,err = exec(container,"/bin/sh")
 	}
 	// 关闭I/O流
 	defer hr.Close()
 	// 退出进程
 	defer func() {
-		_,_ = hr.Conn.Write([]byte("exit\r"))
+		_, _ = hr.Conn.Write([]byte("exit\r"))
 	}()
 
 	go func() {
@@ -83,13 +84,13 @@ func terminal(w http.ResponseWriter, r *http.Request) {
 	wsReaderCopy(conn, hr.Conn)
 }
 
-func exec(container string) (hr types.HijackedResponse, err error) {
+func exec(container string,shell string) (hr types.HijackedResponse, err error) {
 	// 执行/bin/sh命令
 	ir, err := cli.ContainerExecCreate(ctx, container, types.ExecConfig{
 		AttachStdin:  true,
 		AttachStdout: true,
 		AttachStderr: true,
-		Cmd:          []string{"/bin/sh"},
+		Cmd:          []string{shell},
 		Tty:          true,
 	})
 	if err != nil {
@@ -97,9 +98,11 @@ func exec(container string) (hr types.HijackedResponse, err error) {
 	}
 
 	// 附加到上面创建的/bin/sh进程中
-	hr, err = cli.ContainerExecAttach(ctx, ir.ID, types.ExecStartCheck{Detach: false, Tty: true})
+	hr, err = cli.ContainerExecAttach(ctx, ir.ID, types.ExecConfig{Tty: true, Detach: false})
+
+	err = cli.ContainerExecResize(ctx, ir.ID, types.ResizeOptions{Width: 1280, Height: 1280})
 	if err != nil {
-		return
+		return hr,err
 	}
 	return
 }
@@ -127,7 +130,7 @@ func wsReaderCopy(reader *websocket.Conn, writer io.Writer) {
 			return
 		}
 		if messageType == websocket.TextMessage {
-			_,_ = writer.Write(p)
+			_, _ = writer.Write(p)
 		}
 	}
 }
