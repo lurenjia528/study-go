@@ -1,0 +1,86 @@
+variables:
+  REPO_NAME: 192.168.42.19/yanggt/demo
+
+before_script:
+  - mkdir -p $GOPATH/src/$(dirname $REPO_NAME)
+  - ln -svf $CI_PROJECT_DIR $GOPATH/src/$REPO_NAME
+  - cd $GOPATH/src/$REPO_NAME
+
+# cache:
+#   paths:
+#   - docker
+
+stages:
+  - test
+  - build-binary
+  - build-push-image
+  - deploy
+
+format:
+  stage: test
+  image: kylincloud2.hub/kube-system/golang:1.12.5-stretch
+  script:
+    - go fmt $(go list ./... | grep -v /vendor/)
+  #   - go vet $(go list ./... | grep -v /vendor/)
+  #   - go test -race $(go list ./... | grep -v /vendor/)
+
+compile:
+  stage: build-binary
+  image: kylincloud2.hub/kube-system/golang:1.12.5-stretch
+  script:
+    - go build -o $CI_PROJECT_DIR/docker/sleep
+  artifacts:
+    paths:
+      - docker
+
+build:
+  stage: build-push-image
+  image:
+    name: kylincloud2.hub/kube-system/kaniko:v0.9.0
+  script:
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - |
+      echo "-----BEGIN CERTIFICATE-----
+      MIIDujCCAqKgAwIBAgIUe5nywL4BO9GCEkzci2h6jTRT5EQwDQYJKoZIhvcNAQEL
+      BQAwdTELMAkGA1UEBhMCVFcxDzANBgNVBAgTBlRhaXBlaTEPMA0GA1UEBxMGVGFp
+      cGVpMRMwEQYDVQQKEwpLdWJlcm5ldGVzMRowGAYDVQQLExFLdWJlcm5ldGVzLW1h
+      bnVhbDETMBEGA1UEAxMKa3ViZXJuZXRlczAeFw0xOTA1MjkwOTU3MDBaFw0yNDA1
+      MjcwOTU3MDBaMHUxCzAJBgNVBAYTAlRXMQ8wDQYDVQQIEwZUYWlwZWkxDzANBgNV
+      BAcTBlRhaXBlaTETMBEGA1UEChMKS3ViZXJuZXRlczEaMBgGA1UECxMRS3ViZXJu
+      ZXRlcy1tYW51YWwxEzARBgNVBAMTCmt1YmVybmV0ZXMwggEiMA0GCSqGSIb3DQEB
+      AQUAA4IBDwAwggEKAoIBAQC47ET4xUs2iUxj0J2YxK0/51t+PoOX76WCQ6Pqundv
+      Z6WFjLNiKLPfuCp7U24s6JNnVtUyaOcuYxNo21lg7BMrKHx7He0R+SgupLmPHpa7
+      xZz2N807u2syfpaIY6lWvx0fJYfMWrc9D8Ajw77U9CbB7rr6TZZ0ToMQzYEvZmcc
+      F8xk7u0mvohmxMS34EAqT0yRQVvpD+X3UJvyglBrKXapIufX2FwJDtgeHACpmlGv
+      hvi58x6xgXI6/l0hRkW/5v6ToeCKElybvgwJnevv8tebZH8xDju/yK0ghDjA4J/7
+      NTpC4nVKxJWWXnSIlEFcZbTYBSZcd9iINpPOniXG96wHAgMBAAGjQjBAMA4GA1Ud
+      DwEB/wQEAwIBBjAPBgNVHRMBAf8EBTADAQH/MB0GA1UdDgQWBBQEhK3Lh2axVhwd
+      pXvEqNYG05whizANBgkqhkiG9w0BAQsFAAOCAQEAfSNQT8YpYEUG42DVut5CtLuH
+      jzXFdkKpNO0WrK2IMLDxw7PcSdB3J6FKP0S4tM0AF0cPE272XO2770DBBRJLlBnz
+      uCEHVhmFR+aKuTik5Fu3wDwtnftVaQ0kDc61UVQ/Hbo/I8Av4TDqDHllJEktjY4U
+      YyBUrwJy1LLkU+xG5YEmYLn/XVn28o7HWiMwUHUYEzRo7wa1ETYHaXKsfvsI1gkI
+      fBdDb/P9Sg2dq4kmPf0WJLU26Dv/UcJyM07qVqzPUEG3ETcTL0X0rkTSQt2aXg9h
+      03QH9eLXhV8bmFqnXcmRGDgxdMyKwOFTl51ZlD25tOw3RA7JSGJ0eog2Tmu6Gw==
+      -----END CERTIFICATE-----" >> /kaniko/ssl/certs/ca-certificates.crt
+    - echo $YGT
+    - echo $DOCKER_EXTRA_HOSTS
+    - /kaniko/executor --context $CI_PROJECT_DIR/docker --dockerfile $CI_PROJECT_DIR/docker/Dockerfile --destination $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    - echo "build push success"
+
+deploy:
+  stage: deploy
+  image: kylincloud2.hub/kube-system/kubectl:1.14.2
+  script:
+    - kubectl version
+    - cd manifests/
+    - sed -i "s@__APPVERSION__@$APPVERSION@g" deploy.yaml service.yaml
+    - sed -i "s@__fullImageName__@$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG@g" deploy.yaml
+    - echo +++++++++++++++++++++++++++++++++++
+    - cat deploy.yaml
+    - echo +++++++++++++++++++++++++++++++++++
+    - cat service.yaml
+    - echo +++++++++++++++++++++++++++++++++++
+    - kubectl apply -f deploy.yaml
+    - echo ++++++++++++++++++++++
+    - kubectl apply -f service.yaml
+    - kubectl get -f deploy.yaml,service.yaml
