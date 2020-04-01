@@ -1,5 +1,5 @@
 <template>
-  <div ref="terminal"></div>
+  <div ref="terminal" style="width: 1280px;height: 1000px;"></div>
 </template>
 
 <script>
@@ -21,7 +21,7 @@ export default {
     Terminal.applyAddon(webLinks);
 
     const terminal = new Terminal();
-    const ws = new WebSocket("ws://127.0.0.1:8000/terminal?container=867a99982579");
+    const ws = new WebSocket("ws://192.168.17.187:8000/terminal?container=a54c54556b45");
     ws.onclose = function() {
       console.log("服务器关闭了连接");
     };

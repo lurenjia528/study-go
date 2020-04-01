@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gitlab-k8s-demo
+  namespace: gitlab
+  labels:
+    app: gitlab-k8s-demo
+    version: __APPVERSION__
+    track: stable
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gitlab-k8s-demo
+#      version: __APPVERSION__
+      version: 1
+  template:
+    metadata:
+      labels:
+        app: gitlab-k8s-demo
+        version: __APPVERSION__
+        track: stable
+    spec:
+      imagePullSecrets:
+        - name: myregistrykey
+      containers:
+      - name: app
+        image: __fullImageName__
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: http-metrics
+          protocol: TCP
+          containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 3
+          timeoutSeconds: 2
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 3
+          timeoutSeconds: 2

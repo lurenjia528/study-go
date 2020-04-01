@@ -1,0 +1,10 @@
+swagger: "2.0"
+info:
+  title: 测试
+  version: "1.0"
+  license: {}
+paths: {}
+definitions:
+  models.ZDTCustomer.Customer:
+    title: Customer
+    type: object

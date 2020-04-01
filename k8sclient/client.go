@@ -4,12 +4,19 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
+	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/remotecommand"
+	"k8s.io/client-go/transport/spdy"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	//restclient "k8s.io/client-go/rest"
 )
 
 func main() {
@@ -21,11 +28,92 @@ func main() {
 
 	//getAllDeployment(clientSet)
 
-	getOneDeployment(clientSet)
+	//getOneDeployment(clientSet)
+
+	//getPodLog(clientSet)
+
+	//execPod(clientSet)
+	test(clientSet)
+}
+
+func test(clientset *kubernetes.Clientset){
+	bytes, err := clientset.
+		RESTClient().
+		Get().
+		RequestURI("https://192.168.40.160:6443/apis/metrics.k8s.io/v1beta1/namespaces/istio-system/pods/istio-telemetry-6587975b4c-v8m8r").
+		DoRaw()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(bytes))
+}
+
+func execPod(clientset *kubernetes.Clientset){
+	//remotecommand.NewSPDYExecutor()
+	//client := clientset.RESTClient()
+	//closer, err := client.Post().RequestURI("https://192.168.40.121:6443/api/v1/namespaces/logging/pods/fluentd-es-ssxds/exec?command=bash&container=fluentd-es&stdin=true&stdout=true&tty=true").Stream()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//defer closer.Close()
+	//io.Copy(os.Stdout,closer)
+
+	var tsq remotecommand.TerminalSizeQueue
+	so := remotecommand.StreamOptions{
+		Stdout:os.Stdout,
+		Stdin:os.Stdin,
+		Stderr:os.Stdout,
+		Tty:true,
+		TerminalSizeQueue:tsq,
+	}
+	var transport http.RoundTripper
+	var upgrader spdy.Upgrader
+	var url  = url.URL{
+		Scheme:"https",
+		Host:"192.168.40.160:6443",
+		///api/v1/namespaces/istio/pods/cloudapiserver-86b8d5768f-dc5cr/exec?command=bash&container=cloudapiserver&stdin=true&stdout=true&tty=true
+		Path:"/api/v1/namespaces/logging/pods/fluentd-es-ssxds/exec?container=fluentd-es",
+	}
+	executor, err := remotecommand.NewSPDYExecutorForProtocols(transport, upgrader, "POST", &url, "http")
+	if err != nil {
+		panic(err)
+	}
+	err = executor.Stream(so)
+	if err != nil {
+		panic(err)
+	}
+}
+
+func getPodLog(clientSet *kubernetes.Clientset) {
+	var i int64
+	i = 100
+	opts := &v1.PodLogOptions{
+		Container: "fluentd-es",
+		Follow:true,
+		TailLines: &i,
+	}
+
+	request := clientSet.CoreV1().Pods("logging").GetLogs("fluentd-es-ssxds", opts)
+
+	// 追踪日志　kubectl logs -f
+	closer, err := request.Stream()
+	if err != nil {
+		panic(err)
+	}
+	defer closer.Close()
+	io.Copy(os.Stdout,closer)
+
+	// 静态日志　kubectl logs
+	//bytes, err := request.Do().Raw()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//	print(string(bytes))
+
 }
 
 func getOneDeployment(clientSet *kubernetes.Clientset) {
-	deployment, err := clientSet.AppsV1().Deployments("kube-system").Get("cloudapiservera", metav1.GetOptions{})
+	deployment, err := clientSet.AppsV1().Deployments("istio").Get("cloudapiserver", metav1.GetOptions{})
 	if errors.IsNotFound(err) {
 		fmt.Println("deployment not found")
 	}
