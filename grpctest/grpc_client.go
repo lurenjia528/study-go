@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"github.com/lurenjia528/study-go/grpctest/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"net/http"
+	"time"
 )
 
 // 此处应与服务器端对应
@@ -16,7 +18,7 @@ const address = "127.0.0.1:50051"
 var addr string
 
 func init() {
-	flag.StringVar(&addr, "addr", "grpc_server address", "grpc服务端地址")
+	flag.StringVar(&addr, "addr", "127.0.0.1", "grpc服务端地址")
 }
 
 /**
@@ -28,6 +30,7 @@ func init() {
 func main() {
 	flag.Parse()
 	http.HandleFunc("/hw", hand)
+	http.HandleFunc("/hwA", handA)
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -35,6 +38,44 @@ func hand(resp http.ResponseWriter, req *http.Request) {
 	auth := req.Header.Get("Authorization")
 	fmt.Println(auth)
 	grpcclient(auth)
+}
+
+func handA(resp http.ResponseWriter, req *http.Request) {
+	a := grpcclientA()
+	fmt.Fprintf(resp, a)
+}
+
+func grpcclientA() string{
+	// 创建一个grpc连接器
+	conn, err := grpc.Dial(addr+":50051", grpc.WithInsecure())
+	if err != nil {
+		fmt.Println(err)
+	}
+	// 当请求完毕后记得关闭连接,否则大量连接会占用资源
+	defer conn.Close()
+
+	// 创建grpc客户端
+	c := pb.NewGreeterClient(conn)
+
+	ctx := context.Background()
+
+	//md := metadata.MD{}
+	//ctx = metadata.AppendToOutgoingContext(ctx, "Authorization", auth)
+	//grpc.SetHeader(ctx, md)
+
+	name := "我是客户端,正在请求服务端A!!!"
+	// 客户端向grpc服务端发起请求
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	result, err := c.SayHelloAgain(ctx, &pb.HelloRequest{Name: name})
+	fmt.Println(name)
+	if err != nil {
+		fmt.Println("请求失败!!!")
+		return "请求失败!!!"
+	}
+	// 获取服务端返回的结果
+	marshal, _ := json.Marshal(result)
+	return string(marshal)
 }
 
 func grpcclient(auth string) {
@@ -57,6 +98,8 @@ func grpcclient(auth string) {
 
 	name := "我是客户端,正在请求服务端!!!"
 	// 客户端向grpc服务端发起请求
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
 	result, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
 	fmt.Println(name)
 	if err != nil {
