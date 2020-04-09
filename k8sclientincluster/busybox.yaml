@@ -1,0 +1,43 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: busybox2
+  namespace: default
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: busybox
+        version: v1
+    spec:
+      serviceAccountName: kubernetes-busybox
+      imagePullSecrets:
+        - name: myregistrykey
+      containers:
+        - image: kylincloud2.hub/kube-system/busybox:0.0.1
+          command: ["/bin/sh", "-c", "sleep 36000"]
+          imagePullPolicy: IfNotPresent
+          name: busybox
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kubernetes-busybox
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: kubernetes-busybox
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: kubernetes-busybox
+    namespace: default
+
