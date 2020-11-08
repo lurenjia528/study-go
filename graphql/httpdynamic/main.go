@@ -14,7 +14,8 @@ import (
 
 var schema graphql.Schema
 
-const jsonDataFile = "/home/lurenjia/gopath/src/github.com/lurenjia528/study-go/graphql/httpdynamic/data.json"
+//const jsonDataFile = "/home/lurenjia/gopath/src/github.com/lurenjia528/study-go/graphql/httpdynamic/data.json"
+const jsonDataFile = "E:\\softwarelocation\\go\\gopath\\src\\github.com\\lurenjia528\\study-go\\graphql\\httpdynamic\\data.json"
 
 func handleSIGUSR1(c chan os.Signal) {
 	for {
@@ -118,10 +119,10 @@ func main() {
 	}
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, req *http.Request) {
 		result := executeQuery(req.URL.Query().Get("query"), schema)
-		json.NewEncoder(w).Encode(result)
+		_ = json.NewEncoder(w).Encode(result)
 	})
 	fmt.Printf("listen on 8080")
 	fmt.Printf("测试url:  curl -g 'http://localhost:8080/graphql?query={user(name:\"Dan\"){id,surname}}'\n")
 	fmt.Printf("reload json file:   kill -SIGUSR1 %s \n", strconv.Itoa(os.Getpid()))
-	http.ListenAndServe(":8080", nil)
+	_ = http.ListenAndServe(":8080", nil)
 }

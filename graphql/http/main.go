@@ -92,12 +92,13 @@ func importJSONDataFromFile(fileName string, result interface{}) (isOk bool) {
 }
 
 func main() {
-	_ = importJSONDataFromFile("/home/lurenjia/gopath/src/github.com/lurenjia528/study-go/graphql/http/data.json", &data)
+	//_ = importJSONDataFromFile("/home/lurenjia/gopath/src/github.com/lurenjia528/study-go/graphql/http/data.json", &data)
+	_ = importJSONDataFromFile("E:\\softwarelocation\\go\\gopath\\src\\github.com\\lurenjia528\\study-go\\graphql\\http\\data.json", &data)
 	http.HandleFunc("/graphql", func(w http.ResponseWriter, r *http.Request) {
 		result := execQuery(r.URL.Query().Get("query"), schema)
-		json.NewEncoder(w).Encode(result)
+		_ = json.NewEncoder(w).Encode(result)
 	})
 	fmt.Println("listen on 8080")
 	fmt.Println("测试地址:  curl -g 'http://127.0.0.1:8080/graphql?query={user(id:\"1\"){name}}'")
-	http.ListenAndServe(":8080", nil)
+	_ = http.ListenAndServe(":8080", nil)
 }
