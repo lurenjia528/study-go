@@ -43,9 +43,12 @@ func main() {
 	go func() {
 		http.HandleFunc("/changeCode", changeCode)
 	}()
+	go func() {
+		http.HandleFunc("/db", connDb)
+	}()
 	fmt.Println("访问路径 curl -v http://" + ip + ":" + port + "/health")
-	fmt.Println("或")
 	fmt.Println("访问路径 curl -X POST http://" + ip + ":" + port + "/changeCode?code=xxx")
+	fmt.Println("访问路径 curl  http://" + ip + ":" + port + "/db")
 	_ = http.ListenAndServe(":"+port, nil)
 }
 
@@ -54,7 +57,7 @@ func health(w http.ResponseWriter, r *http.Request) {
 		code = 200
 	}
 	w.WriteHeader(code)
-	_,_ = w.Write([]byte("ok health"))
+	_, _ = w.Write([]byte("ok health"))
 }
 
 func changeCode(w http.ResponseWriter, request *http.Request) {
@@ -66,4 +69,8 @@ func changeCode(w http.ResponseWriter, request *http.Request) {
 	code1 := request.Form.Get("code")
 	code2, _ := strconv.Atoi(code1)
 	code = code2
+}
+
+func connDb(w http.ResponseWriter, r *http.Request) {
+
 }
