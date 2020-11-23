@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
+	//"encoding/json"
+	"github.com/golang/protobuf/jsonpb"
 	"github.com/lurenjia528/study-go/grpctest/pb"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -22,11 +24,11 @@ func init() {
 }
 
 /**
-    1. 创建groc连接器
-    2. 创建grpc客户端,并将连接器赋值给客户端
-    3. 向grpc服务端发起请求
-    4. 获取grpc服务端返回的结果
- */
+  1. 创建groc连接器
+  2. 创建grpc客户端,并将连接器赋值给客户端
+  3. 向grpc服务端发起请求
+  4. 获取grpc服务端返回的结果
+*/
 func main() {
 	flag.Parse()
 	http.HandleFunc("/hw", hand)
@@ -45,7 +47,7 @@ func handA(resp http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(resp, a)
 }
 
-func grpcclientA() string{
+func grpcclientA() string {
 	// 创建一个grpc连接器
 	conn, err := grpc.Dial(addr+":50051", grpc.WithInsecure())
 	if err != nil {
@@ -74,8 +76,18 @@ func grpcclientA() string{
 		return "请求失败!!!"
 	}
 	// 获取服务端返回的结果
-	marshal, _ := json.Marshal(result)
-	return string(marshal)
+	var jsonpbMarshaler *jsonpb.Marshaler
+	jsonpbMarshaler = &jsonpb.Marshaler{
+		EnumsAsInts:  true,
+		EmitDefaults: true,
+		OrigName:     true,
+	}
+	var (
+		_buffer bytes.Buffer
+	)
+	_ = jsonpbMarshaler.Marshal(&_buffer, result)
+	fmt.Println(_buffer.String())
+	return _buffer.String()
 }
 
 func grpcclient(auth string) {
