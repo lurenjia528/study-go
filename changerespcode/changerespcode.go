@@ -90,10 +90,10 @@ const (
 	dbName string = "postgres"
 )
 
-var postgresDSN = fmt.Sprintf("user=%s password=%s database=%s host=%s port=%s Timezone=Asia/Shanghai ",
-	dbUser, dbPassword, dbName, dbHost, dbPort)
 
 func connDb(w http.ResponseWriter, r *http.Request) {
+var postgresDSN = fmt.Sprintf("user=%s password=%s database=%s host=%s port=%s Timezone=Asia/Shanghai ",
+	dbUser, dbPassword, dbName, dbHost, dbPort)
 
 	var result = "healthy"
 	code22 := 200
