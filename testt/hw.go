@@ -40,7 +40,7 @@ func main() {
 }
 
 func addHeader(w http.ResponseWriter, r *http.Request) {
-	println("请求url:", r.URL)
+	println("请求url:", r.URL.String())
 	println("请求header:")
 	for k, v := range r.Header {
 		fmt.Printf("%s:%v\n", k, v)
