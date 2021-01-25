@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"net"
 	"net/http"
@@ -27,10 +28,27 @@ func main() {
 	go func() {
 		http.HandleFunc("/", sayHelloName)
 	}()
+	go func() {
+		http.HandleFunc("/request", addHeader)
+	}()
 	fmt.Println("访问路径 http://" + ip + ":" + port + "/chan")
 	fmt.Println("或")
 	fmt.Println("访问路径 http://" + ip + ":" + port + "/")
+	fmt.Println("或")
+	fmt.Println("访问路径 http://" + ip + ":" + port + "/request")
 	_ = http.ListenAndServe(":"+port, nil)
+}
+
+func addHeader(w http.ResponseWriter, r *http.Request) {
+	println("请求url:", r.URL)
+	println("请求header:")
+	for k, v := range r.Header {
+		fmt.Printf("%s:%v\n", k, v)
+	}
+	println("请求方法:", r.Method)
+	all, _ := ioutil.ReadAll(r.Body)
+	println("请求体:", string(all))
+	_, _ = fmt.Fprintf(w, "ok\n")
 }
 
 func sayHelloName(w http.ResponseWriter, r *http.Request) {
